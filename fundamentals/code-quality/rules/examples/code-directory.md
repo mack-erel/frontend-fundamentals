@@ -8,68 +8,68 @@
 
 함께 수정되는 소스 파일을 하나의 디렉토리에 배치하면 코드의 의존 관계를 명확하게 드러낼 수 있어요. 그래서 참조하면 안 되는 파일을 함부로 참조하는 것을 막고, 연관된 파일들을 한 번에 삭제할 수 있어요.
 
-## 📝 SvelteKit 기준 폴더 구조 예시
+## 📝 코드 예시
 
-다음은 SvelteKit에서 도메인/기능별로 코드를 구조화한 예시예요.
+다음 코드는 프로젝트의 모든 파일을 모듈의 종류(Presentational 컴포넌트, Container 컴포넌트, Hook, 상수 등)에 따라 분류한 디렉토리 구조예요.
 
 ```text
 └─ src
-   ├─ routes
-   │   ├─ +page.svelte
-   │   └─ ... (페이지별 폴더)
-   └─ lib
-       ├─ components
-       ├─ stores
-       ├─ utils
-       ├─ api
-       └─ domains
-           ├─ domain1
-           │   ├─ components
-           │   ├─ stores
-           │   ├─ utils
-           │   └─ ...
-           └─ domain2
-               ├─ components
-               ├─ stores
-               ├─ utils
-               └─ ...
+   ├─ components
+   ├─ constants
+   ├─ containers
+   ├─ contexts
+   ├─ remotes
+   ├─ hooks
+   ├─ utils
+   └─ ...
 ```
 
 ## 👃 코드 냄새 맡아보기
 
 ### 응집도
 
-파일을 도메인/기능별로 묶지 않고 종류별로만 나누면, 어떤 코드가 어떤 코드를 참조하는지 쉽게 확인할 수 없어요. 코드 파일 사이의 의존 관계는 개발자가 스스로 코드를 분석하면서 챙겨야 해요.
+파일을 이렇게 종류별로 나누면 어떤 코드가 어떤 코드를 참조하는지 쉽게 확인할 수 없어요. 코드 파일 사이의 의존 관계는 개발자가 스스로 코드를 분석하면서 챙겨야 해요.
 또한 더 이상 특정 컴포넌트나 Hook, 유틸리티 함수가 사용되지 않아서 삭제된다고 했을 때, 연관된 코드가 함께 삭제되지 못해서 사용되지 않는 코드가 남아있게 될 수도 있어요.
 
 프로젝트의 크기는 점점 커지기 마련인데, 프로젝트의 크기가 2배, 10배, 100배 커짐에 따라서 코드 사이의 의존관계도 크게 복잡해질 수 있어요. 디렉토리 하나가 100개가 넘는 파일을 담고 있게 될 수도 있어요.
 
 ## ✏️ 개선해보기
 
-함께 수정되는 코드 파일끼리 하나의 디렉토리를 이루도록 구조를 개선한 예시예요.
+다음은 함께 수정되는 코드 파일끼리 하나의 디렉토리를 이루도록 구조를 개선한 예시예요.
 
 ```text
 └─ src
-   └─ lib
-       └─ domains
-           ├─ domain1
-           │   ├─ components
-           │   ├─ stores
-           │   ├─ utils
-           │   └─ ...
-           └─ domain2
-               ├─ components
-               ├─ stores
-               ├─ utils
-               └─ ...
+   │  // 전체 프로젝트에서 사용되는 코드
+   ├─ components
+   ├─ containers
+   ├─ hooks
+   ├─ utils
+   ├─ ...
+   │
+   └─ domains
+      │  // Domain1에서만 사용되는 코드
+      ├─ Domain1
+      │     ├─ components
+      │     ├─ containers
+      │     ├─ hooks
+      │     ├─ utils
+      │     └─ ...
+      │
+      │  // Domain2에서만 사용되는 코드
+      └─ Domain2
+            ├─ components
+            ├─ containers
+            ├─ hooks
+            ├─ utils
+            └─ ...
 ```
 
 함께 수정되는 코드 파일을 하나의 디렉토리 아래에 둔다면, 코드 사이의 의존 관계를 파악하기 쉬워요.
 
-예를 들어, 다음과 같이 한 도메인(`domain1`)의 하위 코드에서 다른 도메인(`domain2`)의 소스 코드를 참조한다고 생각해 볼게요.
+예를 들어, 다음과 같이 한 도메인(`Domain1`)의 하위 코드에서 다른 도메인(`Domain2`)의 소스 코드를 참조한다고 생각해 볼게요.
 
 ```typescript
-import { useFoo } from "../../../domain2/utils/useFoo";
+import { useFoo } from "../../../Domain2/hooks/useFoo";
 ```
 
 이런 import 문을 만난다면 잘못된 파일을 참조하고 있다는 것을 쉽게 인지할 수 있게 돼요.
